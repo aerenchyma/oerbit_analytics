@@ -219,7 +219,7 @@ function oer_analytics_cronapi() { // $op and $job = NULL params -- ?? necessary
   $items['oer_analytics_cron'] = array(
     'description' => 'Perform updates/new population of db tables for oer_analytics module.',
     'rule' => '0 2 * * *', // every day at 2am
-    'callback' => '_oer_analytics_prepcron',
+    'callback' => '_oer_analytics_prepcron', // can I do mult callbacks? TODO
     'arguments' => array('all'), // ?
   );
 
@@ -450,18 +450,22 @@ class GoogleAnalyticsData
 
 }
 
-function _oer_dashboard_prepcron() {
-  // basically creating an instance of googleanalyticsdata class from prep class above, running main fxn to write json
-  // TODO: check-will it write the json to the current server directory like it's supposed to?
-  // is that acceptable?
-    $a = new GoogleAnalyticsData();
-    $a->main();
-}
+// function _oer_dashboard_prepcron() {
+//   // basically creating an instance of googleanalyticsdata class from prep class above, running main fxn to write json
+//   // TODO: check-will it write the json to the current server directory like it's supposed to?
+//   // is that acceptable?
+    
+// }
 
 
 // Would-be implementing hook_cron(); populates and updates database tables for analytics module.
 function _oer_analytics_prepcron() { 
 //function oer_analytics_cron() { // for testingonly
+
+    // performing all functions to write json file for dashboard - TODO TESTING
+    $a = new GoogleAnalyticsData();
+    $a->main();
+
   $vid_db_info = db_query('SELECT field_course_reference_nid, field_video_value FROM {content_field_video} INNER JOIN {content_field_course_reference} WHERE content_field_video.vid = content_field_course_reference.vid AND content_field_video.field_video_provider="youtube" ORDER BY field_course_reference_nid'); 
 
   $all_vids_arr = array();
