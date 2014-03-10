@@ -39,11 +39,22 @@
  */
 
 
+// TODO: REMOVE PRIVATE INFORMATION APPROPRIATELY BEFORE RELEASE
+
+
 /**
 * Form builder. Configure oer_analytics module.
 * 
 * @see system_settings_form()
 */
+
+
+// requirements. TODO: check-will this work if they're in the same server directory?
+include 'simple_html_dom.php';
+
+require_once 'google-api-php-client/src/Google_Client.php';
+require_once 'google-api-php-client/src/contrib/Google_AnalyticsService.php';
+
 
 function oer_analytics_admin() {
   $form = array();
@@ -215,6 +226,237 @@ function oer_analytics_cronapi() { // $op and $job = NULL params -- ?? necessary
   return $items;
 }
 
+// functions and class for dashboard preparation
+function time_epoch_secs($timestr) {
+  //date("M-d-Y", mktime(0, 0, 0, 12, 32, 1997))
+  print "timestr " . $timestr . PHP_EOL; 
+  $yr = substr($timestr,0,4);
+  $mon = substr($timestr,4,2);
+  $day = substr($timestr,6,2); // till end basically
+  //return (string) date("U",mktime(0,0,0,$day,$mon,$yr));
+  //print $yr . PHP_EOL;
+  print $mon . PHP_EOL;
+  //print $day . PHP_EOL;
+  print $yr."/".$mon."/".$day . PHP_EOL;
+  print strtotime($yr."/".$mon."/".$day) . PHP_EOL;
+  return strtotime($yr."/".$mon."/".$day);
+}
+
+class GoogleAnalyticsData
+{
+  private $client_secrets = 'client_secrets.json';
+  private $profileid = "8335957";
+  public $pgpath = "/education/med/m2/cardio"; // for changing -- dynamically? maybe. if it's in cron.. !!
+
+  function initialize_service() { 
+    //session_start();
+    //$json = file_get_contents("client_secrets.json"); // need at least profile id, secure info later
+    $client_id = '499241700101-57d4k698fucadpvdejtlvbtij3etmi2t.apps.googleusercontent.com';
+    //const SERVICE_ACCOUNT_NAME = 'OpenMichigan Metrics';
+    $keyfile = 'c20de7635213887f6537463ac7efebe806e1c8b1-privatekey.p12'; // this also must be private
+    // Initialize the Google Client object
+    $client = new Google_Client();
+    $client->setApplicationName('OpenMichigan Metrics');
+    $client->setAssertionCredentials(
+            new Google_AssertionCredentials(
+            '499241700101-57d4k698fucadpvdejtlvbtij3etmi2t@developer.gserviceaccount.com', array('https://www.googleapis.com/auth/analytics.readonly'), file_get_contents($keyfile)
+            )
+    );
+    $client->setClientId($client_id);
+    $client->setAccessType('offline_access');
+    $analytics = new Google_AnalyticsService($client); // does this make it avail to whole class?
+    return $analytics;
+  } // end initialize_service
+
+  function get_bulk_dl_link() {
+    $url = "http://open.umich.edu" . $this->pgpath;
+    $html = file_get_html($url);
+    foreach($html->find('a') as $element) {
+      if (preg_match("%Download all materials%",$element->innertext) != FALSE) {
+        $dlsurl = $element->href;
+        print $dlsurl;
+      }
+    }
+    return $dlsurl;
+  } // end get_bulk_dl_link
+
+  function get_vid_ids() {
+    $url = "http://open.umich.edu" . $this->pgpath . "/materials"; 
+    //echo $url;
+    $html = file_get_html($url);
+    $yt_links = array();
+    foreach($html->find('a') as $element) {
+      if (preg_match("%youtube%",$element->href) != FALSE && $element->href != "http://www.youtube.com/user/openmichigan") {
+        array_push($yt_links, $element->href);
+      }
+    }
+    $vid_ids = array();
+    foreach($yt_links as $link) {
+      echo $link;
+      $ind = strpos($link, "watch?v=");
+      $plc = substr($link, $ind+8, $ind+19);
+      //echo $plc;
+      array_push($vid_ids, $plc);
+    }
+    return $vid_ids;
+  } // end get_vid_ids
+
+  function youtube_metrics() {
+    $vids = $this->get_vid_ids();
+    print_r(array_values($vids));
+    $baseurl_one = "http://gdata.youtube.com/feeds/api/videos?q=";
+    $baseurl_two = "&v=2&alt=jsonc";
+    $aggregateStats = array("views"=>0,"likes"=>0,"comments"=>0);
+    if (count(vids) > 0) { // hmmmmm
+      foreach ($vids as $id) {
+        $resp = file_get_contents($baseurl_one . $id . $baseurl_two);
+        echo $baseurl_one . $id . $baseurl_two . PHP_EOL;
+        // need error check for this, if it has status code 200
+        //echo $resp;
+        // $videos = json_decode($resp);
+        // echo $videos;
+        $json_resp = json_decode($resp, TRUE);
+        foreach ($json_resp['data']['items'] as $item) {
+          $aggregateStats["views"] += (int) $item['viewCount'];
+          $aggregateStats["likes"] += (int) $item['likeCount'];
+          $aggregateStats["comments"] += (int) $item['commentCount'];
+          // echo $aggregateStats["views"] . PHP_EOL;
+          // echo $aggregateStats["likes"] . PHP_EOL;
+          // echo $aggregateStats["comments"] . PHP_EOL;
+        } // TODO IMPORTANT: is this aggregation correct? nums weird
+      }
+      return $aggregateStats;
+    }
+    else {
+      //return array("error" => "YouTube API error. Check response status code."); // fix when error checking improved
+      return "No YouTube content"; // for errorcheck (hm)
+    } // end get_yt_metrics
+    // echo "views" . $aggregateStats["views"] . PHP_EOL;
+    //// TODO: suspicion of some of thse numbers. check, but functionality there for now.
+  }
+
+  function om_api_courseviews() {
+    $url = "http://open.umich.edu" . $this->pgpath;
+    $html = file_get_html($url);
+    $vizid = $html->find('p[id=visits-num]');
+    $str_visits = $vizid[0]->innertext;
+    //echo $str_visits . PHP_EOL;
+    return $str_visits;
+  } // end om_api_courseviews
+
+  // function make_requests() {
+  //  //$api = new analytics_api();
+  //  $start_date = strtotime("2013-09-01"); // hard coded for now
+  //  $end_date = strtotime('-1 day');
+  //  //$filters = array();
+  //  //$filters['current_path'] = 'ga:pagePath=' . $this->pgpath;
+  //  $filter = 'ga:pagePath=' . $this->pgpath;
+  //  $metric = 'ga:pageviews'; // for now
+  //  // from website:  $data = $api->data($id, '', $metric, false, date('Y-m-d', $from), date('Y-m-d', $till), 10, 1, urlencode($filter));
+  //  $data = $this->api->data($this->profileid, $metrics, false, $start_date, $end_date, $filter);
+  //  echo $data;
+  // } // end make_requests
+
+  function main() {
+    $analytics_do = $this->initialize_service();
+    $lastMonth = date('Y-m-d', strtotime('-4 week'));
+    $today = date('Y-m-d');
+    $metrics = "ga:pageviews"; // number of s/visits/pageviews but tbchanged probably
+    $dimensions = "ga:date"; // by days
+    $places_dims = "ga:country"; //,ga:region -- maybe later, it is cool
+    $sort = "ga:date"; // order by date
+    $sort_pl = "-ga:pageviews";
+    $filters = "ga:pagePath==" . $this->pgpath;
+    $dls_filters = "ga:pagePath==" . $this->get_bulk_dl_link();
+    $analytics_id = "ga:" . $this->profileid;
+    $optParams = array('dimensions' => $dimensions, 'sort' => $sort, 'filters' => $filters);
+    $places_params = array('dimensions' => $places_dims, 'sort' => $sort_pl, 'filters' => $filters);
+    $dls_params = array('dimensions' => $dimensions, 'sort' => $sort, 'filters' => $dls_filters);
+    try {
+        $results = $analytics_do->data_ga->get($analytics_id, $lastMonth, $today, $metrics, $optParams);
+      $dls_res = $analytics_do->data_ga->get($analytics_id, $lastMonth, $today, $metrics, $dls_params);
+      $places_res = $analytics_do->data_ga->get($analytics_id, $lastMonth, $today, $metrics, $places_params);
+
+    } catch (Exception $e) {
+        echo 'There was an error : - ' . $e->getMessage();
+    }
+    print "FILTERS!!!";
+    print $dls_filters;
+    print $filters;
+
+    $timeseries = array();
+    $dlstimesr = array();
+    $places = array();
+    $data = $results['rows']; // This is the time series data
+    $dls_data = $dls_res['rows'];
+    $pl_data = $places_res['rows'];
+    //print_r(array_values($pl_data));
+    foreach ($data as $d) {
+      $timeseries[$d[0]] = $d[1];
+    }
+    foreach ($dls_data as $dd) {
+      $dlstimesr[$dd[0]] = $dd[1];
+    }
+    $nations = array();
+
+    foreach ($pl_data as $dl) {
+      if ($dl[0] != "(not set)") {
+        //// not needed because not lookin at region atm
+        // if ($dl[1] != "(not set)") { 
+        //  $places[$dl[0]] = $dl[1]; // hmm does this keep order?
+        // } else {
+        //  $places[$dl[0]] = "";
+        // }
+        $places[$dl[0]] = "";
+      }
+    }
+    foreach ($places as $country=>$reg) {
+      array_push($nations,$country);
+    }
+    //print_r(array_values($nations));
+    $xyvals = array();
+    $dlsxy = array();
+    foreach ($timeseries as $a=>$b) {
+      //echo $a . " " . $b . PHP_EOL;
+      $timest = $a;//(int) time_epoch_secs($a);//(int) $a; //time_epoch_secs($a);
+      $b = (int) $b;
+      array_push($xyvals,array("x"=>$timest,"y"=>$b));
+    }
+    foreach ($dlstimesr as $e => $f) {
+      $t = (int) $e;//time_epoch_secs($e); // right? 
+      $r = (int) $f;
+      array_push($dlsxy, array("x"=>$t,"y"=>$r));
+    }
+    
+    //print_r(array_values($xyvals));
+
+    //return $timeseries; // use this to create json file -- that data
+    $final_data = array();
+    $ytm = $this->youtube_metrics();
+    print_r(array_values($ytm));
+    $final_data['youtube_metrics']["yt_metrics"] = $ytm;
+    $final_data['nations'] = array_slice($nations,0,10); // nations not sorted properly
+    $final_data['nations_num']['num_nations'] = count($nations);
+    $final_data['course_views']['total_course_views'] = $this->om_api_courseviews();
+    $final_data['course_views']['data'] = $xyvals;
+    $final_data['dls_data'] = $dlsxy;
+
+    // writing json file from $final_data
+    $fp = fopen('currt_data.json','w');
+    fwrite($fp, json_encode($final_data));
+    fclose($fp);
+
+  }
+
+}
+
+function _oer_dashboard_prepcron() {
+  // basically creating an instance of googleanalyticsdata class from prep class above, running main fxn to write json
+  // TODO: check-will it write the json to the current server directory like it's supposed to?
+  // is that acceptable?
+    $a = new GoogleAnalyticsData();
+    $a->main();
+}
 
 
 // Would-be implementing hook_cron(); populates and updates database tables for analytics module.
