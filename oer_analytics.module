@@ -303,39 +303,6 @@ function _oer_analytics_prepcron() {
     }
   }
 
-  // $all_courses = db_query("SELECT nid FROM {content_type_course}");
-  // $allcourses = array();
-  // while ($row = db_fetch_object($all_courses)) {
-  //   array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
-  // }
-
-  // $tracked = array();
-  // $tracked_courses = db_query("SELECT nid FROM {oer_analytics_courses}");
-  //  while ($row = db_fetch_object($tracked_courses)) {
-  //   array_push($tracked, $row->nid);
-  // }
-
-  // // Saving course views and downloads information in oer_analytics_courses table
-  // // Still using other module fxns to control for caching/rate limit issues, but will have this info accessible from db
-  // foreach($allcourses as $course_nid) {
-  //   $path = "http://open.umich.edu/node/${course_nid}";
-  //   $res_one = google_analytics_counter_get_sum_per_path($path); 
-  //   $res_dls = google_analytics_counter_get_sum_per_path($path . "/zip_download");
-  //   $courseviews = (int) $res_one[0];
-  //   $dlsviews = (int) $res_dls[0];
-  //   if ($dlsviews >= 10) {
-  //     $inparr = array('nid' => $course_nid, 'totalviews' => $courseviews, 'total_zipdownloads' => $dlsviews);
-  //   } else {
-  //     $inparr = array('nid' => $course_nid, 'totalviews' => $courseviews);
-  //   }
- 
-  //   if (array_search($course_nid,$tracked) !== FALSE) {
-  //     drupal_write_record('oer_analytics_courses', $inparr, 'nid'); // oer_analytics_courses already has a record for course {$course_nid}
-  //   } else {
-  //     drupal_write_record('oer_analytics_courses', $inparr); // create a new entry in oer_analytics_courses for this course
-  //   }
-  // }
-
 } // end cron block
 
 
