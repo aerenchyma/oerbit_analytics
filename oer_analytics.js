@@ -67,31 +67,51 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
             var dt;
             var dls;
 
+            window.full_path = location.href;
+            var rdf_path = full_path + "/rdf";
+            //var rdf_feed;
+            window.nid; // creates space? -- check js style TODO
+            $.get(rdf_path, function( data ) {
+              //alert( "Get was gotten" );
+              //alert(data);
+              var rdf_feed = data;
+              var patt = /feed\/(\d{3,4})/i; // regep for feed/nid
+              var interim = rdf_feed.match(patt); // returns int position in rdf feed
+              //alert(interim[1]);
+              nid = interim[1];
+              // var inter = interim.split("/"); // array of two items now
+              // console.log(inter);
+              // nid = interim[1];
+              // alert(nid);
+              //rdf_feed.substring(interim+5,// nid should be the rdf_feed string at that int position + "feed/"
+
+            });
+
             var svg_two = d3.select("#courseViews").append("svg")
                 .attr("width",width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-            d3.json('/oer_analytics/getdashboardinfo/1945', function(error, data) {
+            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid;
+            d3.json(url_full, function(error, data) {
                     var inner_data = JSON.parse(data.data);
                     dt = inner_data.course_views.data;
                     window.path_test = location.href;
                     console.log(path_test);
                     dt.forEach(function(d) {
                         //alert(dt);
-                        console.log('DT BEFORE: x is ' + d.x + ', and y is ' + d.y);
+                        //console.log('DT BEFORE: x is ' + d.x + ', and y is ' + d.y);
                         d.x = parseDate(String(d.x));
                         d.y = d.y;
-                        console.log('DT AFTER : x is ' + d.x + ', and y is ' + d.y);
+                        //console.log('DT AFTER : x is ' + d.x + ', and y is ' + d.y);
                     });
 
                     dls = inner_data.dls_data;
                     dls.forEach(function(d) {
-                        console.log('DLS BEFORE: x is ' + d.x + ', and y is ' + d.y);
+                        //console.log('DLS BEFORE: x is ' + d.x + ', and y is ' + d.y);
                         d.x = parseDate(String(d.x));
                         d.y = d.y;
-                        console.log('DLS AFTER : x is ' + d.x + ', and y is ' + d.y);
+                        //console.log('DLS AFTER : x is ' + d.x + ', and y is ' + d.y);
                     });
 
 
@@ -117,17 +137,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                           .style("text-anchor", "end")
                           .text("Total (views or downloads)");
                     
-                      //svg_two.append("path")
-                          //.datum(dt)
-                          //.attr("class", "bar")
-                          //.attr("d", line);
-                    
-                      // svg_two.append("path")
-                      //     .datum(dls)
-                      //     .attr("class", "line")
-                      //     .attr("id","dlsline")
-                      //     .attr("d", line(dls));
-
+                    // draw the two paths (lines) on the chart
                       svg_two.append("path")
                         .data(dt)
                         .attr("class", "line")
@@ -143,8 +153,6 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                         .attr('fill','none')
                         .attr("id","dlsline")
                         .attr("d", line(dls));
-
-//                      var dataset = dls;
                       
                       var legend = svg_two.append("g")
                               .attr("class", "legend")
@@ -154,6 +162,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                               .attr("width", 100)
                               //.attr('transform', 'translate(-20,50)');
                       
+                      // add text and legend stuff (?)
                       legend.selectAll('rect')
                                 .data(dataset)
                                 .enter()
@@ -185,14 +194,15 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 
 	updateData(1);
 
-	// begin JavaScript for dashboard -- TODO alter for database context
+	// begin JavaScript for dashboard
 	  $.ajax({
-	    url : '/oer_analytics/getdashboardinfo/1945', // is this how to get it? //'currt_data.json', -- same as jquery get??
+	    url : '/oer_analytics/getdashboardinfo/1945', 
 	    type : 'GET',
 	    success: function(data, textStatus, xhr) { 
         	      "use strict"; // still the same?
                       var d = JSON.parse(data);
 
+                // grab all the time series data and things from the json
         	      window.datayay = JSON.parse(d.data);
         	      window.num_nations = window.datayay.nations_num.num_nations;
         	      window.nations = window.datayay.nations;
@@ -204,7 +214,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
         	      var totalviews = document.getElementById("totalViews");
         	      totalviews.innerHTML = window.course_views;
 
-        	      if (yt_data.views >=25) { // another condition better? for now though
+        	      if (yt_data.views >=25) { // another condition better? for now though; TODO decide
         	        window.yt_title = document.getElementById("ytMetrics");
         	        yt_title.innerHTML = "total YouTube content metrics";
 	        
@@ -221,7 +231,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
         	      window.ntitle = document.getElementById("nations_title");
         	      ntitle.innerHTML = "top nations visiting this course of " + window.num_nations + " different nations";
 
-        	      // GET countries, for now
+        	      // GET countries
         	      window.nations_list_area = document.getElementById("top_nations");
         	      for (var y = 0; y < nations.length; y++) {
         	        var newListItem = document.createElement("li");
