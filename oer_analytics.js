@@ -29,8 +29,6 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 	});	
 
         function updateData(load) {
-
-
                 // begin d3 JavaScript for dashboard -- does this work??
                   var margin = {top: 30, right: 30, bottom: 30, left: 50},
                       width = 800 - margin.left - margin.right,
@@ -76,15 +74,9 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
               //alert(data);
               var rdf_feed = data;
               var patt = /feed\/(\d{3,4})/i; // regep for feed/nid
-              var interim = rdf_feed.match(patt); // returns int position in rdf feed
+              var interim = rdf_feed.match(patt); // returns match on regexp, we want the second matched group
               //alert(interim[1]);
-              nid = interim[1];
-              // var inter = interim.split("/"); // array of two items now
-              // console.log(inter);
-              // nid = interim[1];
-              // alert(nid);
-              //rdf_feed.substring(interim+5,// nid should be the rdf_feed string at that int position + "feed/"
-
+              nid = interim[1]; // the second matched group
             });
 
             var svg_two = d3.select("#courseViews").append("svg")
@@ -92,7 +84,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid;
+            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for req
             d3.json(url_full, function(error, data) {
                     var inner_data = JSON.parse(data.data);
                     dt = inner_data.course_views.data;
@@ -242,11 +234,9 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 
 	    },
 	    error: function() {
-	            "use strict"; alert('aw, sad, something is broken');
-            }, // is this the same behavior?
+	            "use strict"; console.log('aw, sad, something is broken');
+            },
 	  });
-
-// balanced brackets?? TODO check
 };
 
 
