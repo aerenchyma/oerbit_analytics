@@ -67,15 +67,11 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 
             window.full_path = location.href;
             var rdf_path = full_path + "/rdf";
-            //var rdf_feed;
             window.nid; // creates space? -- check js style TODO
             $.get(rdf_path, function( data ) {
-              //alert( "Get was gotten" );
-              //alert(data);
               var rdf_feed = data;
               var patt = /feed\/(\d{3,4})/i; // regep for feed/nid
               var interim = rdf_feed.match(patt); // returns match on regexp, we want the second matched group
-              //alert(interim[1]);
               nid = interim[1]; // the second matched group
             });
 
@@ -86,12 +82,15 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
             window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for req
             d3.json(url_full, function(error, data) {
-                    var inner_data = JSON.parse(data.data);
+                    // console logging for debugging -- testing ran out api limits? v possible
+                    console.log("can we figure out this data problem?");
+                    console.log(data);
+                    console.log(data.data);
+                    var inner_data = JSON.parse(data.data); 
                     dt = inner_data.course_views.data;
-                    window.path_test = location.href;
-                    console.log(path_test);
+                    // window.path_test = location.href;
+                    // console.log(path_test);
                     dt.forEach(function(d) {
-                        //alert(dt);
                         //console.log('DT BEFORE: x is ' + d.x + ', and y is ' + d.y);
                         d.x = parseDate(String(d.x));
                         d.y = d.y;
@@ -106,9 +105,6 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                         //console.log('DLS AFTER : x is ' + d.x + ', and y is ' + d.y);
                     });
 
-
-                    // x.domain(d3.extent(dt, function(d) { return d.x; })); //d.x;
-                    // y.domain(d3.extent(dt, function(d) { return d.y; }));
                     x.domain(d3.extent(dt, function(d) { return d.x; }));
                     y.domain([0, d3.max(dt, function(d) {return d.y})]);
 
