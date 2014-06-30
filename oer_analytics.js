@@ -80,8 +80,8 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for req
-            d3.json(url_full, function(error, data) {
+            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for re
+            d3.json(window.url_full, function(error, data) {
                     // console logging for debugging -- testing ran out api limits? v possible
                     console.log("can we figure out this data problem?");
                     console.log(data);
