@@ -67,26 +67,39 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 
             window.full_path = location.href;
             var rdf_path = full_path + "/rdf";
-            window.nid; // creates space? -- check js style TODO
+            //var nid; // creates space? -- check js style TODO
             $.get(rdf_path, function( data ) {
               var rdf_feed = data;
               var patt = /feed\/(\d{3,4})/i; // regep for feed/nid
               var interim = rdf_feed.match(patt); // returns match on regexp, we want the second matched group
-              nid = interim[1]; // the second matched group
-            });
+              window.nid = interim[1]; // the second matched group
+              console.log("in jquery get,");
+              console.log(window.nid);
 
-            var svg_two = d3.select("#courseViews").append("svg")
+              window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for re
+              console.log(window.url_full);
+
+              var svg_two = d3.select("#courseViews").append("svg")
                 .attr("width",width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            window.url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for re
+            //console.log("right before url full composition,");
+            //console.log(window.nid);
+
+            //$ (document).trigger(function () { // doc ready d3 bit
+
+            //var url_full = "/oer_analytics/getdashboardinfo/" + window.nid; // add the nid to base url now for re
+            console.log(window.url_full);
             d3.json(window.url_full, function(error, data) {
                     // console logging for debugging -- testing ran out api limits? v possible
                     console.log("can we figure out this data problem?");
+                    console.log(window.url_full); // right contxt??
                     console.log(data);
                     console.log(data.data);
-                    var inner_data = JSON.parse(data.data); 
+                    // trying to make sure getting the right data when it's dynamically gotten via the url
+                    //var idata = JSON.parse(data.data); 
+                    var inner_data = JSON.parse(data.data); //(idata.data);
                     dt = inner_data.course_views.data;
                     // window.path_test = location.href;
                     // console.log(path_test);
@@ -175,8 +188,13 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                                   var text = color_hash[dls.indexOf(d)][0];
                                   return text;
                                 })
-                                ;   
+                                ;  
+            });
+
+             
               });
+
+           // }); // end doc ready -- hopefully this balances
 
 	} // end updateData function
 
