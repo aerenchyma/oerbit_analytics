@@ -70,7 +70,8 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
             //var nid; // creates space? -- check js style TODO
             $.get(rdf_path, function( data ) {
               var rdf_feed = data;
-              var patt = /feed\/(\d{3,4})/i; // regep for feed/nid
+              console.log("rdf feed is: " + rdf_feed);
+              var patt = /node\\?\/(\d{3,5})/i; // regep for feed/nid
               var interim = rdf_feed.match(patt); // returns match on regexp, we want the second matched group
               window.nid = interim[1]; // the second matched group
               console.log("in jquery get,");
@@ -111,7 +112,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                     // console.log(path_test);
 
 
-                    // PASTE IN OTHER AJAX STUFF
+            // PASTE IN OTHER AJAX STUFF
                     window.num_nations = inner_data.nations_num.num_nations;
                     window.nations = inner_data.nations;
                     //console.log(window.nations);
@@ -141,14 +142,15 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
 
                     // GET countries
                     window.nations_list_area = document.getElementById("top_nations");
-                    for (var y = 0; y < nations.length; y++) {
+                    for (var index = 0; index < nations.length; index++) {
                       var newListItem = document.createElement("li");
-                      var nationListVal = document.createTextNode(nations[y]);
+                      var nationListVal = document.createTextNode(nations[index]);
                       newListItem.appendChild(nationListVal);
                       nations_list_area.appendChild(newListItem);
                     }
 
                     // END OTHER AJAX STUFF
+                    
 
 
 
@@ -166,9 +168,22 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                         d.y = d.y;
                         //console.log('DLS AFTER : x is ' + d.x + ', and y is ' + d.y);
                     });
+// new
+                    var y_max;
+                    try {
+                        y_max = d3.max(dt, function(d) {return parseInt(d.y); });
+                    }
+                    catch(err) {
+                        console.log('d3.max d.y ' + err.message);
+                    }
 
+                    console.log ('x.domain is '  + d3.extent(dt, function(d) { return d.x; }));
+                    console.log ('y_max is ' + y_max);
                     x.domain(d3.extent(dt, function(d) { return d.x; }));
-                    y.domain([0, d3.max(dt, function(d) {return d.y; })]); // unchanged
+                    y.domain([0, y_max]);
+// end new
+                    // x.domain(d3.extent(dt, function(d) { return d.x; }));
+                    // y.domain([0, d3.max(dt, function(d) {return parseInt(d.y); })]); // unchanged
 
                     // Draw the x axis line
                     svg_two.append("g")
