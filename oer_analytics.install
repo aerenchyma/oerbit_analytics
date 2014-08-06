@@ -39,63 +39,63 @@ function oer_analytics_enable() {
 function oer_analytics_schema() {
 	//drupal_set_message((st('Adding tables for oer_analytics')));
 
-	$schema['oer_analytics_data'] = array(
-		'fields' => array(
-			'course_nid' => array(
-				'description' => 'Course node number',
-				'type' => 'int',
-				'unsigned' => TRUE,
-				'not null' => TRUE,
-				),
-			'youtube_views' => array(
-				'description' => 'Number of views on youtube vid content for a course',
-				'type' => 'int',
-				'unsigned' => TRUE,
-				'not null' => TRUE,
-				'default' => 0,
-				),
-			'number_yt_vids' => array(
-				'description' => 'Number of youtube vids associated with the given course',
-				'type' => 'int',
-				'unsigned' => TRUE,
-				'not null' => TRUE,
-				'default' => 0,
-				),
-			'number_nations' => array(
-				'description' => 'Number of nations from which this course has been accessed',
-				'type' => 'int',
-				'unsigned' => TRUE,
-				'not null' => TRUE,
-				'default' => 0,
-				),
-			'number_downloads' => array(
-				'description' => 'Number of times a zip download of course materials has (probably) been downloaded',
-				'type' => 'int',
-				'unsigned' => TRUE,
-				'not null' => TRUE,
-				'default' => 0,
-				),
-			'nations' => array(
-				'description' => 'Text list of nations from which this course has been accessed',
-				'type' => 'varchar',
-				'length' => 2000,
-				'default' => '',
-				),
-			'course_title' => array(
-				'description' => 'Text title of course',
-				'type' => 'varchar',
-				'length' => 180,
-				'default' => 'No title available',
-				),
-			'unit' => array(
-				'description' => 'Unit within which course is associated',
-				'type' => 'varchar',
-				'length' => 180,
-				'default' => '',
-				),
+	// $schema['oer_analytics_data'] = array(
+	// 	'fields' => array(
+	// 		'course_nid' => array(
+	// 			'description' => 'Course node number',
+	// 			'type' => 'int',
+	// 			'unsigned' => TRUE,
+	// 			'not null' => TRUE,
+	// 			),
+	// 		'youtube_views' => array(
+	// 			'description' => 'Number of views on youtube vid content for a course',
+	// 			'type' => 'int',
+	// 			'unsigned' => TRUE,
+	// 			'not null' => TRUE,
+	// 			'default' => 0,
+	// 			),
+	// 		'number_yt_vids' => array(
+	// 			'description' => 'Number of youtube vids associated with the given course',
+	// 			'type' => 'int',
+	// 			'unsigned' => TRUE,
+	// 			'not null' => TRUE,
+	// 			'default' => 0,
+	// 			),
+	// 		'number_nations' => array(
+	// 			'description' => 'Number of nations from which this course has been accessed',
+	// 			'type' => 'int',
+	// 			'unsigned' => TRUE,
+	// 			'not null' => TRUE,
+	// 			'default' => 0,
+	// 			),
+	// 		'number_downloads' => array(
+	// 			'description' => 'Number of times a zip download of course materials has (probably) been downloaded',
+	// 			'type' => 'int',
+	// 			'unsigned' => TRUE,
+	// 			'not null' => TRUE,
+	// 			'default' => 0,
+	// 			),
+	// 		'nations' => array(
+	// 			'description' => 'Text list of nations from which this course has been accessed',
+	// 			'type' => 'varchar',
+	// 			'length' => 2000,
+	// 			'default' => '',
+	// 			),
+	// 		'course_title' => array(
+	// 			'description' => 'Text title of course',
+	// 			'type' => 'varchar',
+	// 			'length' => 180,
+	// 			'default' => 'No title available',
+	// 			),
+	// 		'unit' => array(
+	// 			'description' => 'Unit within which course is associated',
+	// 			'type' => 'varchar',
+	// 			'length' => 180,
+	// 			'default' => '',
+	// 			),
 
-		),
-	);
+	// 	),
+	// );
 
 	$schema['oer_analytics_courses'] = array(
 		'fields' => array(
