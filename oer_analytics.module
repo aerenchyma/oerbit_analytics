@@ -650,7 +650,7 @@ function _oer_analytics_prepcron() {
       $ip = array('nid'=>$c,'base_db_json'=>$st);
       ////now, make database checks and addor update oer_analytics_courses table  
       //if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
-        drupal_write_record('oer_analytics_courses', $ip, 'nid'); // no new courses in this test, so removed the check
+        drupal_write_record('oer_analytics_courses', $ip); // include ',nid' once there ARE courses // no new courses in this test, so removed the check
         $a = memory_get_usage(); // checking memory usage because of prev overload
         log_to_apache($a);
       //} 
