@@ -136,14 +136,9 @@ function oer_analytics_get_dashboard_info($nid) {
   while ($r = db_fetch_object($strres)) {
     $json_str = $r->base_db_json;
   }
+  //// test data for json str
   //$json_str = '{"youtube_metrics":{"yt_metrics":{"views":29,"likes":111,"comments":7}},"nations":["USA","Canada"],"nations_num":{"num_nations":2},"course_views":{"total_course_views":"19,670","data":[{"x":20140319,"y":2},{"x":20140320,"y":4},{"x":20140321,"y":0},{"x":20140322,"y":4},{"x":20140323,"y":3},{"x":20140324,"y":7},{"x":20140325,"y":9},{"x":20140326,"y":5},{"x":20140327,"y":30},{"x":20140328,"y":6},{"x":20140329,"y":9},{"x":20140330,"y":22},{"x":20140331,"y":2},{"x":20140401,"y":4},{"x":20140402,"y":8},{"x":20140403,"y":10},{"x":20140404,"y":4},{"x":20140405,"y":7},{"x":20140406,"y":2},{"x":20140407,"y":1},{"x":20140408,"y":0},{"x":20140409,"y":7},{"x":20140410,"y":4},{"x":20140411,"y":1},{"x":20140412,"y":3},{"x":20140413,"y":5},{"x":20140414,"y":7},{"x":20140415,"y":4},{"x":20140416,"y":8}]},"dls_data":[{"x":20140319,"y":3},{"x":20140320,"y":8},{"x":20140321,"y":2},{"x":20140322,"y":11},{"x":20140323,"y":3},{"x":20140324,"y":2},{"x":20140325,"y":8},{"x":20140326,"y":3},{"x":20140327,"y":2},{"x":20140328,"y":2},{"x":20140329,"y":3},{"x":20140330,"y":8},{"x":20140331,"y":2},{"x":20140401,"y":3},{"x":20140402,"y":22},{"x":20140403,"y":2},{"x":20140404,"y":8},{"x":20140405,"y":2},{"x":20140406,"y":3},{"x":20140407,"y":8},{"x":20140408,"y":14},{"x":20140409,"y":2},{"x":20140410,"y":3},{"x":20140411,"y":8},{"x":20140412,"y":4},{"x":20140413,"y":3},{"x":20140414,"y":2},{"x":20140415,"y":18},{"x":20140416,"y":3}]}';
   drupal_json(array('status' => "0", 'data' => $json_str));
-  //$json_str = json_decode($json_str);
-  //$typetest = gettype($json_str);
-  //dpm($typetest);
-  //return $json_str;
-  //dpm($json_str);
-  //drupal_json($json_str); // does this work the same? TODO check type management here
 }
 
 
@@ -171,17 +166,9 @@ function today() {
 } 
 
 function time_epoch_secs($timestr) {
-  //date("M-d-Y", mktime(0, 0, 0, 12, 32, 1997))
-  //print "timestr " . $timestr . PHP_EOL; 
   $yr = substr($timestr,0,4);
   $mon = substr($timestr,4,2);
   $day = substr($timestr,6,2); // till end basically
-  //return (string) date("U",mktime(0,0,0,$day,$mon,$yr));
-  //print $yr . PHP_EOL;
-  //print $mon . PHP_EOL;
-  //print $day . PHP_EOL;
-  //print $yr."/".$mon."/".$day . PHP_EOL;
-  //print strtotime($yr."/".$mon."/".$day) . PHP_EOL;
   return strtotime($yr."/".$mon."/".$day);
 }
 
@@ -192,31 +179,18 @@ function oer_analytics_init(){
   drupal_add_css(drupal_get_path('module', 'oer_analytics') .'/oer_analytics.css');
 
   drupal_add_js(drupal_get_path('module', 'oer_analytics') .'/oer_analytics.js');
-  
   $variables['scripts'] = drupal_get_js();
 }
 
 function hook_js_alter(&$javascript) {
   // Swap out jQuery to use an updated version of the library. 
-  $javascript['misc/jquery.js']['data'] = drupal_get_path('module', 'jquery_update') . '/jquery.js';
-  // // below: new code, will it work -- supposedly not for Drupal 6 but let us see TODO
-  //   if (isset($js['misc/jquery.js'])) {
-  //       $jsPath = 'https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js';
-  //       $js['misc/jquery.js']['data'] = $jsPath;
-  //       $js['misc/jquery.js']['version'] = '1.8.3';
-  //   }  
+  $javascript['misc/jquery.js']['data'] = drupal_get_path('module', 'jquery_update') . '/jquery.js'; 
 }
 
-// calling add-js function
-
-
-function oer_analytics_counter_get_searched_path() { // keeping this for now, v useful
+function oer_analytics_counter_get_searched_path() {
   $path = check_plain(implode('/', arg()));
   return $path;
-  //return trim(substr($path,1)); // no leading slash; this isn't needed
-} // TODO check integration (fine for now)
-
-
+}
 
 /* get (correct, aliased) page path from an OERbit node number */
 function get_pagepath($nodenum) {
@@ -226,7 +200,7 @@ function get_pagepath($nodenum) {
   }
   //dpm($p); // debug! working?
   return $p;
-} // TODO may need improved error checking -- may not be needed
+} // TODO may need improved error checking at some point
 
 // $path = explode("gac_get_count", $path);
 //   $path = $path[1];
@@ -241,15 +215,8 @@ function landingpg_path($fullpath) {
   return $fullpath;
 }
 
-
-// Google Analytics Counter method calls (?)
-
-
-
 function get_video_title($videoid) { // NEW
-    //$api_key = "AIzaSyAv0ljLFFoCpJ0PEsdyJ6ycmqfP6ZOQj6E";
-
-    $api_key = variable_get('oer_analytics_gac_key', array()); // excitement?
+    $api_key = variable_get('oer_analytics_gac_key', array()); 
     $baseurl = "https://www.googleapis.com/youtube/v3/videos?id={$videoid}&key={$api_key}&part=snippet";
 
     $JSON_first = drupal_http_request($baseurl);
@@ -259,19 +226,13 @@ function get_video_title($videoid) { // NEW
     return $title;
 }
 
-
-
 function get_video_data($videoid) { // NEW
-    //$api_key = "AIzaSyAv0ljLFFoCpJ0PEsdyJ6ycmqfP6ZOQj6E";
-
-    $api_key = variable_get('oer_analytics_gac_key', array()); // excitement?
+    $api_key = variable_get('oer_analytics_gac_key', array()); 
     $baseurl = "https://www.googleapis.com/youtube/v3/videos?id={$videoid}&key={$api_key}&part=snippet,statistics";
 
     $JSON_first = drupal_http_request($baseurl);
     $JSON = $JSON_first->data;
     $json_data = json_decode($JSON);
-    // after requesting and json parsing and all that
-    // needs testing, of course
     $tmp = $json_data->{'items'}[0]->{'statistics'};
     //print $tmp;
     $views = (int) $tmp->{'viewCount'};
@@ -333,16 +294,13 @@ function _oer_analytics_prepcron() {
   $currvids = db_query('SELECT videoid FROM {oer_analytics_vids}');
   while ($row = db_fetch_object($currvids)) {
     $vi = $row->videoid;
-    if (array_key_exists($vi, $all_vids_arr)) { // May have been deleted
+    if (array_key_exists($vi, $all_vids_arr)) {	// May have been deleted
       //drupal_set_message("Video ID {$vi} is already being tracked");
       $all_vids_arr[$vi]['already_tracked'] = TRUE;
     } else {
       //drupal_set_message("Video ID {$vi} appears to have been deleted");
     }
   }
-
-  //drupal_set_message('finished processing this list of currently tracked videos');
-  //dvm($all_vids_arr);
 
   // For each current video, get the view count and write out the
   // updated (or new) entry with the view count for that video
@@ -355,7 +313,7 @@ function _oer_analytics_prepcron() {
     $data_views = $vidarr['views'];
     $inp_arr = array('videoid' => $vid_id,
                      'course_nid' => $info['course_nid'],
-         'totalviews' => $data_views, 'totalcomments' => $vidarr['comments'], 'totallikes' => $vidarr['likes']); // added comments and likes to db, need to change db schema TODO -- changed as of this writing
+		     'totalviews' => $data_views, 'totalcomments' => $vidarr['comments'], 'totallikes' => $vidarr['likes']);
     if ($info['already_tracked'] === TRUE) {
       //drupal_set_message("oer_analytics_vids already has an entry for videoid {$vid_id}");
       drupal_write_record('oer_analytics_vids', $inp_arr, 'videoid');
@@ -381,7 +339,7 @@ function _oer_analytics_prepcron() {
     //$video_id = $row->videoid;
     $coursenid = $row->course_nid;
     $views = $row->totalviews;
-    // this one-element non-array is fragile for current setup TODO
+    // this one-element non-array is fragile for current setup
     if (array_key_exists($coursenid, $yt_info)) {
       $yt_info[$coursenid] += (int) $views;
     } else {
@@ -402,14 +360,12 @@ function _oer_analytics_prepcron() {
     }
   }
 
-  $pr_id = variable_get('googleanalytics_profileid',NULL); 
 
     class GoogleAnalyticsData
   {
 
     private $client_secrets = 'client_secrets.json'; // require client_secrets file in directory
-    private $profileid = $pr_id; // variable get won't work here, unexpected syntax errors, ??
-    //public $pagepath = "/education/lsa/statistics250/winter2014"; // construct the pagepath by the course nid passed in
+    private $profileid = variable_get('googleanalytics_profileid', array()); // this one inconsistent. TODO fix.
 
     function __construct($nnum) { // class constructor
        //print "In constructor\n";
@@ -417,23 +373,22 @@ function _oer_analytics_prepcron() {
        $this->nodenum = $nnum;
     }
 
-    // directly copying in fxn that works from infogetting.php for testing purposes
     function initialize_service() { 
       //session_start();
       //$json = file_get_contents("client_secrets.json"); // need at least profile id, secure info later
-      $client_id = variable_get('google_apps_client_id', NULL);
+      $client_id = variable_get('google_apps_client_id', array());
       //const SERVICE_ACCOUNT_NAME = 'OpenMichigan Metrics';
-      $keyfile = variable_get('keyfile_code',NULL); 
-      // make sure that email for service account is added to analytics account access, otherwise this will not work
+      $keyfile = variable_get('keyfile_code',array());
+      // IMP: make sure that email for service account is added to analytics account access, otherwise this will not work
       $key = file_get_contents($keyfile);//(String) drupal_http_request($keyfile);
       // Initialize the Google Client object
+      $access_email = variable_get('google_apps_client_email',array());
       $client = new Google_Client();
       $client->setApplicationName('OpenMichigan Metrics');
-      $clientemail = variable_get('google_apps_client_email', NULL);
       $client->setAssertionCredentials(
               new Google_AssertionCredentials(
-                $clientemail, array('https://www.googleapis.com/auth/analytics.readonly'), $key
-              )
+              $access_email, array('https://www.googleapis.com/auth/analytics.readonly'), $key
+              ) 
       );
       $client->setClientId($client_id);
       $client->setAccessType('offline_access');
@@ -471,8 +426,8 @@ function _oer_analytics_prepcron() {
           //array_push($yt_links, $element->href);
           $link = $element->href;
           $ind = strpos($link, "watch?v=");
-          $plc = substr($link, $ind+8, $ind+19); // something isn't working here TODO
-          log_to_apache("vid id: {$plc}");
+          $plc = substr($link, $ind+8, $ind+19);
+          //log_to_apache("vid id: {$plc}");
           array_push($vid_ids, $plc);
         }
       }
@@ -483,24 +438,24 @@ function _oer_analytics_prepcron() {
       // get youtube metics from db, that should've already run 'n stuff
       // if they exist, output them in associative array like $aggregateStats was
       // if not, return "No YouTube content"
-      // is this repetitive? but all these queries should be to db, not to external req..
+      // all these queries should be to db, not to external req.
       $yt_stuff = db_query("SELECT course_nid, totalviews, totalcomments, totallikes FROM {oer_analytics_youtube} WHERE course_nid = %d", $this->nodenum);
       //dpm($yt_stuff); // debug
       $ty = gettype($yt_stuff);
       log_to_apache("type of yt stuff: {$ty}");
       $ytstuff_course = array();
-      while ($r = db_fetch_object($yt_stuff)) { // should be just one row, can I do it without this? gah php TODO check
+      while ($r = db_fetch_object($yt_stuff)) { // should be just one row, possible better way. TODO.
         $ytstuff_course['views'] = $r->totalviews;
         $ytstuff_course['comments'] = $r->totalcomments;
         $ytstuff_course['likes'] = $r->totallikes;
       }
       log_to_apache("checking youtube metrics in class");
-      //log_to_apache("for example views: {$ytstuff_course['views']}");
+      //log_to_apache("for example, views: {$ytstuff_course['views']}");
       if ($ytstuff_course['views'] >= 1) {
         return $ytstuff_course;
       }
       else {
-        return "No YouTube content"; // TODO better check, will this work ok here
+        return "No YouTube content"; // TODO check
       }
 
     }
@@ -509,11 +464,13 @@ function _oer_analytics_prepcron() {
       $url = "http://open.umich.edu" . $this->pgpath;
       log_to_apache("url: {$url}");
       $html = file_get_html($url);
-      log_to_apache("html for find: {$html}");
-      $vizid = $html->find('p[id=visits-num]');
-      $str_visits = $vizid[0]->innertext;
-      //echo $str_visits . PHP_EOL;
-      return $str_visits;
+      //log_to_apache("html for find: {$html}");
+      if (strpos($this->pgpath, "/education/med/mep/") === FALSE) { // fix for local install with old db
+        $vizid = $html->find('p[id=visits-num]');
+        $str_visits = $vizid[0]->innertext;
+        //echo $str_visits . PHP_EOL;
+        return $str_visits;
+      }
     } // end om_api_courseviews
 
     function main() {
@@ -521,9 +478,9 @@ function _oer_analytics_prepcron() {
       $lastMonth = date('Y-m-d', strtotime('-4 week'));
       $foreverago = date('2005-01-01');
       $today = date('Y-m-d');
-      $metrics = "ga:pageviews"; // number of s/visits/pageviews but tbchanged probably
+      $metrics = "ga:pageviews"; // number of s/visits/pageviews 
       $dimensions = "ga:date"; // by days
-      $places_dims = "ga:country"; //,ga:region -- maybe later, it is cool
+      $places_dims = "ga:country"; //,ga:region -- maybe later
       $sort = "ga:date"; // order by date
       $sort_pl = "-ga:pageviews";
       $filters = "ga:pagePath==" . $this->pgpath; 
@@ -604,74 +561,97 @@ function _oer_analytics_prepcron() {
       //return $timeseries; // use this to create json file -- that data
       $final_data = array();
       $ytm = $this->youtube_metrics();
-      //print_r(array_values($ytm));
-      $final_data['youtube_metrics']["yt_metrics"] = $ytm;
-      $final_data['nations'] = array_slice($nations,0,10); // nations not sorted properly
+      //$final_data['youtube_metrics']["yt_metrics"] = $ytm;
+      //$final_data['course_nid'] = 
+      $final_data['youtube_views'] = $ytm['views']; // for CSV DATA
+      $final_data['nations'] = array_slice($nations,0,10); // nations not sorted properly?
       $final_data['nations_num']['num_nations'] = count($nations);
       $final_data['course_views']['total_course_views'] = $this->om_api_courseviews();
       $final_data['course_views']['data'] = $xyvals;
       $final_data['dls_data'] = $dlsxy;
-
-
+      //dpm($final_data);
+      //return $final_data;
+      //// following commented out JUST FOR CSV DATA
       $str_for_json = (String) json_encode($final_data); // cast array that could be written to json to a string
       return $str_for_json;
-      //file_save_data(drupal_to_js($final_data),"jackie_data_foo.json"); # writes to:/Applications/MAMP/htdocs/sites/default/files/ // don't want to save data to file -- want to save string to db
     }
 
   }
   // $test_nid = 999;
   // $test_var = new GoogleAnalyticsData($test_nid);
 
-  // // PLAN (this has to come after the class because I'm using class initialization a few code blocks down)
-  // // vid stuff had to go above because the class relies on it being done 'this cron round' [ does that make sense? is it procedural that way? seems to have worked so far.. TODO check]
-  // // have course number
-  // // use function to get actual exploded path
-  // // clip it for appropriate page path
-  // // pass it in to the class, run the main unction to get the string, add/update database
-
   //// get ALL courses
-  // $all_courses = db_query("SELECT nid FROM {content_type_course}");
-  // $allcourses = array();
-  // while ($row = db_fetch_object($all_courses)) {
-  //   array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
-  // }
+  $all_courses = db_query("SELECT nid FROM {content_type_course}");
+  $allcourses = array();
+  while ($row = db_fetch_object($all_courses)) {
+    array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
+  }
 
   // // get all courses currently in the db table -- surely there's a faster/better way to do this TODO
   // $gc = db_query("SELECT nid FROM {oer_analytics_courses}");
-  // $got_courses = array();
+  //$got_courses = array();
   // while ($r = db_fetch_object($gc)) {
   //   array_push($got_courses, $r->nid);
   // }
 
-  // fake all-courses array for testing this with just a few courses
-  $python_node = 1388;
-  $stats_node = 4583;
-  $cardio2node = 1945;
-  $got_courses = array();
-  array_push($got_courses, $python_node);
-  array_push($got_courses, $stats_node);
-  array_push($got_courses, $cardio2node);
+  // //fake all-courses array for testing this with just a few courses
+  // $python_node = 1388;
+  // $stats_node = 4583;
+  // $cardio2node = 1945;
+  // $got_courses = array();
+  // array_push($got_courses, $python_node);
+  // array_push($got_courses, $stats_node);
+  // array_push($got_courses, $cardio2node);
 
-  $allcourses = array();
-  array_push($allcourses, $python_node);
-  array_push($allcourses, $stats_node);
-  array_push($allcourses, $cardio2node);
+  // $allcourses = array();
+  // array_push($allcourses, $python_node);
+  // array_push($allcourses, $stats_node);
+  // array_push($allcourses, $cardio2node);
 
 
+//// if commented out, that's to speed up another test
+  $all_data_now = array();
   foreach($allcourses as $c) {
-    //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
-    $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
-    $st = $m->main(); // returns the string for json
-    //echo $st;
-    $ip = array('nid'=>$c,'base_db_json'=>$st);
-    //now, make database checks and addor update oer_analytics_courses table  
-    if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
-      drupal_write_record('oer_analytics_courses', $ip, 'nid');
-    } 
-    else { // this is a new course, new record
-      drupal_write_record('oer_analytics_courses', $ip);
+    log_to_apache("here is node num");
+    log_to_apache($c);
+    $node = node_load($c); // can you node-load just a nid? I think so.
+    if ($node->status) { // if the node is published (ie the node's status is not 0)
+      log_to_apache("check says published - ".$c);
+      //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
+
+      //// following should uncomment for CSV DATA BUSINESS if the other stuff in main is avail to run
+      // $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
+
+      // $st = $m->main(); // returns the string for json -- in CSV data mode, returns array of data
+      // $st['course_nid'] = $c; // hopefully working TODO get unit and course title in here
+      //array_push($all_data_now, $st);
+      // so now hopefully $st is an array with all the data, except it isn't working like we want actually, so get accurate values and put them in db
+
+
+      //// following commented out just for CSV DATA
+      $ip = array('nid'=>$c,'base_db_json'=>$st);
+      ////now, make database checks and addor update oer_analytics_courses table  
+      //if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
+        drupal_write_record('oer_analytics_courses', $ip, 'nid'); // no new courses in this test, so removed the check
+        $a = memory_get_usage(); // checking memory usage because of prev overload
+        log_to_apache($a);
+      //} 
+      // end commented out for CSV DATA, remainder commented out because the else case wasn't set up yet
+
+      // else { // this is a new course, new record
+      //   drupal_write_record('oer_analytics_courses', $ip);
+      // }
     }
   }
+
+  // GET CSV CODE
+  // $f = open("tmpdata.csv","w");
+  // //fputcsv($f, array(""))
+  // foreach($all_data_now as $arr) {
+  //   fputcsv($f, $arr);
+  // }
+  // fclose($f);
+  // END GET CSV CODE
 
 } // end cron block
 
@@ -686,13 +666,91 @@ function oer_analytics_block($op = 'list', $delta = 0, $edit = array()) {
         'info' => t('Course Analytics'),
         //'cache' => BLOCK_CACHE_PER_PAGE, // remember day cached, for speeding things up
       );
+      $blocks['course-metrics'] = array(
+        'info' => t('Course Metrics'),
+        //'cache' => BLOCK_CACHE_PER_PAGE, // remember day cached, for speeding things up
+      );
       return $blocks;
     case 'view':
+      if (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == 'metrics') {
+        return _course_metrics_block(arg(1));
+      }
       if (arg(0) == 'node' && is_numeric(arg(1))) { // node_load() -- check node type
         return _oer_analytics_block(arg(1)); // gets info that will be displayed
       }
   }
 } 
+
+
+function _course_metrics_block($nid) {
+  //dpm("Here we are in _course_metrics_block!!"); // DEBUG
+
+
+
+
+  $node = node_load($nid);
+  if ($node->type == 'course') {
+    drupal_add_js(drupal_get_path('module', 'oer_analytics') . '/d3/d3.js');
+
+    $return_block = array ( 'subject' => t('Metrics Dashboard'), 'content' => <<<EOD
+  <div id="wrapper">
+    <!-- <div id="titlewrap"><h1>Metrics dashboard</h1></div> -->
+    <div class="row">
+      <div class="whole column">
+        <h2>course views and zip downloads over the last 30 days</h2>
+        <h5><span id="cviews"><span class="bluetext"><strong>blue</strong></span><span class="greytext">: <i>course page views</i> </span></span> <span class="neutraltext"><br></span> <span id="cdls"><span class="greentext"><strong>green</strong></span><span class="greytext">: <i>zip downloads</i></span></span></h5>
+        <div id="courseViews" class="chart"></div>
+      </div>
+    </div><!--.row-->   
+    <div class="row">
+      <div class="half column">
+        <h2>total course views since publication</h2>
+        <div id="totalViews" class="biggestNumber"></div>
+      </div>
+      <div class="half column" id="nations">
+        <h2 id="nations_title"></h2>          
+          <ol id="top_nations"></ol>
+      </div>
+      <div class="half column">
+        <h2 id="ytMetrics"></h2>
+        
+        <div class="row">
+          <div class="half column yt">
+            <div class="bigNumber" id="ytViews">
+            </div>
+            <h4>views</h4>
+          </div>
+          <div class="half column yt">
+            <div class="bigNumber" id="ytLikes">
+            </div>
+            <h4>likes</h4>
+          </div>
+        </div>
+        <div class="row">
+          <div class="half column yt">
+            <div class="bigNumber" id="ytComments">
+            </div>
+            <h4>comments</h4>
+          </div>
+        </div>
+
+        <ul id="yt_stats_list">
+        </ul>
+      </div>
+    </div><!--.row-->
+    <div class="row">
+      <div class="whole column">
+        <h2></h2>
+        <div id="totalDownloads"></div>
+      </div>
+    </div>
+EOD
+    );
+    //dpr($return_block); // DEBUG
+    return $return_block;
+  }
+}
+
 
 
 function _oer_analytics_block($nid) {
@@ -745,6 +803,11 @@ function _oer_analytics_block($nid) {
     $courseviews = $resultarr_one[0];
     //drupal_set_message($courseviews);
     $dls_views = $resultarr_dls[0];
+
+
+
+
+
 
     //drupal_set_message($dls_views);
     if ($dls_views > 10) {
