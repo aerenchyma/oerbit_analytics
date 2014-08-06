@@ -95,22 +95,71 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                     // console logging for debugging -- testing ran out api limits? v possible
                     console.log("can we figure out this data problem?");
                     console.log(window.url_full); // right contxt??
-                    console.log(data);
-                    console.log(data.data);
+                    // console.log(data);
+                    // console.log(data.data);
+
+
+
                     // trying to make sure getting the right data when it's dynamically gotten via the url
                     //var idata = JSON.parse(data.data); 
                     var inner_data = JSON.parse(data.data); //(idata.data);
                     dt = inner_data.course_views.data;
+                    dls = inner_data.dls_data;
+                    console.log(dt);
+                    console.log(dls);
                     // window.path_test = location.href;
                     // console.log(path_test);
+
+
+                    // PASTE IN OTHER AJAX STUFF
+                    window.num_nations = inner_data.nations_num.num_nations;
+                    window.nations = inner_data.nations;
+                    //console.log(window.nations);
+                    var curr_data = inner_data.course_views.data;
+                    var dls_data = inner_data.dls_data;
+                    window.yt_data = inner_data.youtube_metrics.yt_metrics;
+                    window.course_views = inner_data.course_views.total_course_views;
+                    var totalviews = document.getElementById("totalViews");
+                    totalviews.innerHTML = window.course_views;
+
+                    if (yt_data.views >=25) { // another condition better? for now though; TODO decide
+                      window.yt_title = document.getElementById("ytMetrics");
+                      yt_title.innerHTML = "total YouTube content metrics";
+              
+                      $("#ytViews").text(yt_data.views);
+                      $("#ytLikes").text(yt_data.likes);
+                      $("#ytComments").text(yt_data.comments);
+    
+
+                    } else {
+                      window.yt_title = document.getElementById("ytMetrics");
+                      yt_title.innerHTML = "No YouTube content";
+                    }
+
+                    window.ntitle = document.getElementById("nations_title");
+                    ntitle.innerHTML = "top nations visiting this course of " + window.num_nations + " different nations";
+
+                    // GET countries
+                    window.nations_list_area = document.getElementById("top_nations");
+                    for (var y = 0; y < nations.length; y++) {
+                      var newListItem = document.createElement("li");
+                      var nationListVal = document.createTextNode(nations[y]);
+                      newListItem.appendChild(nationListVal);
+                      nations_list_area.appendChild(newListItem);
+                    }
+
+                    // END OTHER AJAX STUFF
+
+
+
                     dt.forEach(function(d) {
-                        //console.log('DT BEFORE: x is ' + d.x + ', and y is ' + d.y);
+                        console.log('DT BEFORE: x is ' + d.x + ', and y is ' + d.y);
                         d.x = parseDate(String(d.x));
                         d.y = d.y;
-                        //console.log('DT AFTER : x is ' + d.x + ', and y is ' + d.y);
+                        console.log('DT AFTER : x is ' + d.x + ', and y is ' + d.y);
                     });
 
-                    dls = inner_data.dls_data;
+                   
                     dls.forEach(function(d) {
                         //console.log('DLS BEFORE: x is ' + d.x + ', and y is ' + d.y);
                         d.x = parseDate(String(d.x));
@@ -119,7 +168,7 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                     });
 
                     x.domain(d3.extent(dt, function(d) { return d.x; }));
-                    y.domain([0, d3.max(dt, function(d) {return d.y})]);
+                    y.domain([0, d3.max(dt, function(d) {return d.y; })]); // unchanged
 
                     // Draw the x axis line
                     svg_two.append("g")
@@ -165,8 +214,8 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                       
                       // add text and legend stuff (?)
                       legend.selectAll('rect')
-                                .data(dataset)
-                                .enter()
+                                //.data(dataset)
+                                //.enter()
                               .append("rect")
                                 .attr("x", w - 65)
                                 .attr("y", function(d, i){ return i *  20;})
@@ -175,82 +224,28 @@ Drupal.behaviors.oer_analyticsBehavior = function (context) { // added context
                                 .style("fill", function(d) { 
                                   var color = color_hash[dls.indexOf(d)][1];
                                   return color;
-                                })
-                                ;
+                                });
+                                
                               
                       legend.selectAll('text')
-                                .data(dataset)
-                                .enter()
+                                //.data(dataset)
+                                //.enter()
                                 .append("text")
                                 .attr("x", w - 52)
                                 .attr("y", function(d, i){ return i *  20 + 9;})
                                 .text(function(d) {
                                   var text = color_hash[dls.indexOf(d)][0];
                                   return text;
-                                })
-                                ;  
-            });
-
-             
+                                });  
+                    });
+              
               });
-
-           // }); // end doc ready -- hopefully this balances
 
 	} // end updateData function
 
 	updateData(1);
 
-	// begin JavaScript for dashboard
-	  $.ajax({
-	    url : '/oer_analytics/getdashboardinfo/1945', 
-	    type : 'GET',
-	    success: function(data, textStatus, xhr) { 
-        	      "use strict"; // still the same?
-                      var d = JSON.parse(data);
-
-                // grab all the time series data and things from the json
-        	      window.datayay = JSON.parse(d.data);
-        	      window.num_nations = window.datayay.nations_num.num_nations;
-        	      window.nations = window.datayay.nations;
-        	      //console.log(window.nations);
-        	      var curr_data = window.datayay.course_views.data;
-        	      var dls_data = window.datayay.dls_data;
-        	      window.yt_data = window.datayay.youtube_metrics.yt_metrics;
-        	      window.course_views = window.datayay.course_views.total_course_views;
-        	      var totalviews = document.getElementById("totalViews");
-        	      totalviews.innerHTML = window.course_views;
-
-        	      if (yt_data.views >=25) { // another condition better? for now though; TODO decide
-        	        window.yt_title = document.getElementById("ytMetrics");
-        	        yt_title.innerHTML = "total YouTube content metrics";
-	        
-        	        $("#ytViews").text(yt_data.views);
-        	        $("#ytLikes").text(yt_data.likes);
-        	        $("#ytComments").text(yt_data.comments);
-	  
-
-        	      } else {
-        	        window.yt_title = document.getElementById("ytMetrics");
-        	        yt_title.innerHTML = "No YouTube content";
-        	      }
-
-        	      window.ntitle = document.getElementById("nations_title");
-        	      ntitle.innerHTML = "top nations visiting this course of " + window.num_nations + " different nations";
-
-        	      // GET countries
-        	      window.nations_list_area = document.getElementById("top_nations");
-        	      for (var y = 0; y < nations.length; y++) {
-        	        var newListItem = document.createElement("li");
-        	        var nationListVal = document.createTextNode(nations[y]);
-        	        newListItem.appendChild(nationListVal);
-        	        nations_list_area.appendChild(newListItem);
-        	      }
-
-	    },
-	    error: function() {
-	            "use strict"; console.log('aw, sad, something is broken');
-            },
-	  });
+	
 };
 
 
