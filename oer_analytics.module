@@ -281,6 +281,23 @@ function _oer_analytics_prepcron() {
 
   $vid_db_info = db_query('SELECT field_course_reference_nid, field_video_value FROM {content_field_video} INNER JOIN {content_field_course_reference} WHERE content_field_video.vid = content_field_course_reference.vid AND content_field_video.field_video_provider="youtube" ORDER BY field_course_reference_nid'); 
 
+  //// get ALL courses
+  //// DATAGRAB 
+  $all_courses = db_query("SELECT nid FROM {content_type_course}");
+  $allcourses = array();
+  while ($row = db_fetch_object($all_courses)) {
+    array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
+  }
+
+  // foreach($allcourses as $cnid) {
+  //   $node = node_load($cnid); 
+  //   if ($node->status) { // if the node is published
+  //     $inparr = array('course_nid'=>$cnid);
+  //     drupal_write_record('oer_analytics_data', $inparr);
+  //   }
+  // }
+  //// END DATAGRAB
+
   $all_vids_arr = array();
   while ($row = db_fetch_object($vid_db_info)) {
     $vid = $row->field_video_value;
@@ -580,12 +597,13 @@ function _oer_analytics_prepcron() {
   // $test_nid = 999;
   // $test_var = new GoogleAnalyticsData($test_nid);
 
-  //// get ALL courses
-  $all_courses = db_query("SELECT nid FROM {content_type_course}");
-  $allcourses = array();
-  while ($row = db_fetch_object($all_courses)) {
-    array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
-  }
+  // //// get ALL courses
+  // $all_courses = db_query("SELECT nid FROM {content_type_course}");
+  // $allcourses = array();
+  // while ($row = db_fetch_object($all_courses)) {
+  //   array_push($allcourses, $row->nid); // this array will hold ALL things of type course in OERbit
+  // }
+  //dpm($allcourses[3]);
 
   // // get all courses currently in the db table -- surely there's a faster/better way to do this TODO
   // $gc = db_query("SELECT nid FROM {oer_analytics_courses}");
