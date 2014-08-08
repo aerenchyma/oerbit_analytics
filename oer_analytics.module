@@ -638,9 +638,9 @@ function _oer_analytics_prepcron() {
       //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
 
       //// following should uncomment for CSV DATA BUSINESS if the other stuff in main is avail to run
-      // $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
+      $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
 
-      // $st = $m->main(); // returns the string for json -- in CSV data mode, returns array of data
+      $st = $m->main(); // returns the string for json -- in CSV data mode, returns array of data
       // $st['course_nid'] = $c; // hopefully working TODO get unit and course title in here
       //array_push($all_data_now, $st);
       // so now hopefully $st is an array with all the data, except it isn't working like we want actually, so get accurate values and put them in db
@@ -650,7 +650,7 @@ function _oer_analytics_prepcron() {
       $ip = array('nid'=>$c,'base_db_json'=>$st);
       ////now, make database checks and addor update oer_analytics_courses table  
       //if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
-        drupal_write_record('oer_analytics_courses', $ip); // include ',nid' once there ARE courses // no new courses in this test, so removed the check
+        drupal_write_record('oer_analytics_courses', $ip, 'nid'); // include ',nid' once there ARE courses // no new courses in this test, so removed the check
         $a = memory_get_usage(); // checking memory usage because of prev overload
         log_to_apache($a);
       //} 
