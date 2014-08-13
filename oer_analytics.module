@@ -198,9 +198,8 @@ function get_pagepath($nodenum) {
   while ($paths = db_fetch_object($from_db)) {
     $p = $paths->dst;
   }
-  //dpm($p); // debug! working?
   return $p;
-} // TODO may need improved error checking at some point
+} // TODO may need improved error checking 
 
 // $path = explode("gac_get_count", $path);
 //   $path = $path[1];
