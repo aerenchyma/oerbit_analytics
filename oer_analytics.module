@@ -382,7 +382,7 @@ function _oer_analytics_prepcron() {
   {
 
     private $client_secrets = 'client_secrets.json'; // require client_secrets file in directory
-    private $profileid = variable_get('googleanalytics_profileid', array()); // this one inconsistent. TODO fix.
+    private $profileid = "8335957";//variable_get('googleanalytics_profileid', array()); // this one inconsistent. TODO fix.
 
     function __construct($nnum) { // class constructor
        //print "In constructor\n";
