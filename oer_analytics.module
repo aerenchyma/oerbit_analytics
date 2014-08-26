@@ -381,7 +381,7 @@ function _oer_analytics_prepcron() {
   {
 
     private $client_secrets = 'client_secrets.json'; // require client_secrets file in directory
-    private $profileid = "8335957";//variable_get('googleanalytics_profileid', array()); // this one inconsistent. TODO fix.
+    private $profileid = variable_get('googleanalytics_profileid', array()); // this one inconsistent. IMP TODO fix.
 
     function __construct($nnum) { // class constructor
        //print "In constructor\n";
@@ -635,43 +635,70 @@ function _oer_analytics_prepcron() {
   // array_push($allcourses, $stats_node);
   // array_push($allcourses, $cardio2node);
 
+  $python_node = 1388;
+  $stats_node = 4583;
+  $cardio2node = 1945;
+  $got_courses = array();
+  array_push($got_courses, $python_node);
+  array_push($got_courses, $stats_node);
+  array_push($got_courses, $cardio2node);
 
-//// if commented out, that's to speed up another test
-  $all_data_now = array();
-  $num_of_courses = 0;
+  $allcourses = array();
+  array_push($allcourses, $python_node);
+  array_push($allcourses, $stats_node);
+  array_push($allcourses, $cardio2node);
+
+
   foreach($allcourses as $c) {
-    log_to_apache("here is node num");
-    log_to_apache($c);
-    $node = node_load($c); 
+    //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
+    $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
+    $st = $m->main(); // returns the string for json
+    //echo $st;
+    $ip = array('nid'=>$c,'base_db_json'=>$st);
+    //now, make database checks and addor update oer_analytics_courses table  
+    if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
+      drupal_write_record('oer_analytics_courses', $ip, 'nid');
+    } 
+    else { // this is a new course, new record
+      drupal_write_record('oer_analytics_courses', $ip);
+    }
+  }
+//// if commented out, that's to speed up another test
+  // $all_data_now = array();
+  // $num_of_courses = 0;
+  // foreach($allcourses as $c) {
+  //   log_to_apache("here is node num");
+  //   log_to_apache($c);
+  //   $node = node_load($c); 
     
-    if ($node->status && strpos(get_pagepath($c),"/med/m1") && strpos(get_pagepath($c),"oernetwork") == FALSE) {//&& !strpos(get_pagepath($c),"mep")) { // if the node is published (ie the node's status is not 0) // plus other filtering characteristics
-      log_to_apache("check says published - ".$c);
-      $num_of_courses += 1;
-      log_to_apache("courses with info grabbed: " . $num_of_courses);
-      //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
+  //   if ($node->status && strpos(get_pagepath($c),"/med/familymed")) {//&& !strpos(get_pagepath($c),"mep")) { // if the node is published (ie the node's status is not 0) // plus other filtering characteristics
+  //     log_to_apache("check says published - ".$c);
+  //     $num_of_courses += 1;
+  //     log_to_apache("courses with info grabbed: " . $num_of_courses);
+  //     //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
 
-      //// following should uncomment for CSV DATA BUSINESS if the other stuff in main is avail to run
-      $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
+  //     //// following should uncomment for CSV DATA BUSINESS if the other stuff in main is avail to run
+  //     $m = new GoogleAnalyticsData($c); // pass in node number and this should be okay
 
-      $st = $m->main(); // returns the string for json -- in CSV data mode, returns array of data
-      // $st['course_nid'] = $c; // hopefully working TODO get unit and course title in here
-      //array_push($all_data_now, $st);
-      // so now hopefully $st is an array with all the data, except it isn't working like we want actually, so get accurate values and put them in db
+  //     $st = $m->main(); // returns the string for json -- in CSV data mode, returns array of data
+  //     // $st['course_nid'] = $c; // hopefully working TODO get unit and course title in here
+  //     //array_push($all_data_now, $st);
+  //     // so now hopefully $st is an array with all the data, except it isn't working like we want actually, so get accurate values and put them in db
 
 
-      //// following commented out just for CSV DATA
-      $ip = array('nid'=>$c,'base_db_json'=>$st);
-      ////now, make database checks and addor update oer_analytics_courses table  
-      //if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
-        drupal_write_record('oer_analytics_courses', $ip, 'nid'); // include ',nid' once there ARE courses // no new courses in this test, so removed the check
-        $a = memory_get_usage(); // checking memory usage because of prev overload
-        log_to_apache($a);
-      //} 
-      // end commented out for CSV DATA, remainder commented out because the else case wasn't set up yet
+  //     //// following commented out just for CSV DATA
+  //     $ip = array('nid'=>$c,'base_db_json'=>$st);
+  //     ////now, make database checks and addor update oer_analytics_courses table  
+  //     //if (array_search($c, $got_courses) !== FALSE) { // there's already an entry for this course
+  //       drupal_write_record('oer_analytics_courses', $ip, 'nid'); // include ',nid' once there ARE courses // no new courses in this test, so removed the check
+  //       $a = memory_get_usage(); // checking memory usage because of prev overload
+  //       log_to_apache($a);
+  //     //} 
+  //     // end commented out for CSV DATA, remainder commented out because the else case wasn't set up yet
 
-      // else { // this is a new course, new record
-      //   drupal_write_record('oer_analytics_courses', $ip);
-      // }
+  //     // else { // this is a new course, new record
+  //     //   drupal_write_record('oer_analytics_courses', $ip);
+  //     // }
     }
   }
 
