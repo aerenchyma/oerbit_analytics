@@ -476,16 +476,26 @@ function _oer_analytics_prepcron() {
 
     }
 
+// TODO write function that will check each string in a list of substrings and return true if none of them are in it or something -- replace that long if string, and add "psb" to it
+
     function om_api_courseviews() {
       $url = "http://open.umich.edu" . $this->pgpath;
       log_to_apache("url: {$url}");
       $html = file_get_html($url);
       //log_to_apache("html for find: {$html}");
-      if (strpos($this->pgpath, "/education/med/mep/") === FALSE) { // fix for local install with old db
-        $vizid = $html->find('p[id=visits-num]');
-        $str_visits = $vizid[0]->innertext;
-        //echo $str_visits . PHP_EOL;
-        return $str_visits;
+      if (strpos($this->pgpath, "/education/med/mep/") === FALSE && node_load($this->nodenum)->status) { // fix for local install with old db happening here
+        // TODO: test to see if the addition of published node check allows for all med but oernetwork to run complete
+        try {
+          $vizid = $html->find('p[id=visits-num]'); // this broke it again, is it not catching properly? Aug 25 2014, saved error -- see above for TODO check
+          $str_visits = $vizid[0]->innertext;
+          //echo $str_visits . PHP_EOL;
+          //return $str_visits;
+        } catch (Exception $e) {
+          log_to_apache("error finding visits on pagepath: " . $this->pgpath . "exception " . $e);
+        }
+        if ($str_visits) {
+          return $str_visits; // is it not catching exception because I return in try block? that's weird
+        }
       }
     } // end om_api_courseviews
 
@@ -628,12 +638,16 @@ function _oer_analytics_prepcron() {
 
 //// if commented out, that's to speed up another test
   $all_data_now = array();
+  $num_of_courses = 0;
   foreach($allcourses as $c) {
     log_to_apache("here is node num");
     log_to_apache($c);
-    $node = node_load($c); // can you node-load just a nid? I think so.
-    if ($node->status) { // if the node is published (ie the node's status is not 0)
+    $node = node_load($c); 
+    
+    if ($node->status && strpos(get_pagepath($c),"/med/m1") && strpos(get_pagepath($c),"oernetwork") == FALSE) {//&& !strpos(get_pagepath($c),"mep")) { // if the node is published (ie the node's status is not 0) // plus other filtering characteristics
       log_to_apache("check says published - ".$c);
+      $num_of_courses += 1;
+      log_to_apache("courses with info grabbed: " . $num_of_courses);
       //$currp = get_pagepath($c);  // this happens in class instantiation (or it should) TODO CHECK
 
       //// following should uncomment for CSV DATA BUSINESS if the other stuff in main is avail to run
